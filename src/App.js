@@ -6,6 +6,7 @@ function App() {
 
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
+  const [posts, setPosts] = useState([])
 
   async function handleAdd(){
     await firebase.firestore().collection('posts')
@@ -24,16 +25,26 @@ function App() {
   }
 
   async function buscaPost(){
+    
     await firebase.firestore().collection('posts')
-    .doc('123')
     .get()
     .then((snapshot)=>{
-      setTitulo(snapshot.data().titulo)
-      setAutor(snapshot.data().autor)
+      let lista = []
+
+      snapshot.forEach((doc)=>{
+          lista.push({
+            id: doc.id,
+            titulo: doc.data().titulo,
+            autor: doc.data().autor
+          })
+      })
+
+      setPosts(lista)
+
+    }).catch((error)=>{
+      console.log('Deu algum erro: ' + error)
     })
-    .catch((error)=>{
-      console.log('Gerou algum erro: ' + error)
-    })
+
   }
 
   return (
@@ -51,6 +62,19 @@ function App() {
         <button onClick={handleAdd}>Cadastrar</button>
 
         <button onClick={buscaPost}>Buscar Post</button>
+
+        <br/>
+        
+        <ul>
+          {posts.map((post)=>{
+            return (
+              <li key={post.id}>
+                <span>Titulo: {post.titulo}</span> <br/>
+                <span>Autor: {post.autor}</span> <br/><br/>
+              </li>
+            )
+          })}
+        </ul>
 
 
       </div>
