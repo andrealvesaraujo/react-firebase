@@ -9,6 +9,8 @@ function App() {
   const [cargo,setCargo] = useState('')
   const [nome,setNome] = useState('')
 
+  const [user, setUser] = useState({})
+
 
   async function novoUsuario(){
 
@@ -41,8 +43,29 @@ function App() {
 
   }
 
+  async function login(){
+    await firebase.auth().signInWithEmailAndPassword(email,senha)
+    .then(async (value)=>{  
+      await firebase.firestore().collection('users')
+      .doc(value.user.uid)
+      .get()
+      .then((snapshot)=>{
+        setUser({
+          nome: snapshot.data().nome,
+          cargo: snapshot.data().cargo,
+          status: snapshot.data().status,
+          email: value.user.email
+        })
+      })
+    })
+    .catch((error)=>{
+      console.log('error: '+ error)
+    })
+  }
+
   async function logout(){
     await firebase.auth().signOut()
+    setUser({})
   }
 
   return (
@@ -62,11 +85,24 @@ function App() {
         <label>Senha:</label>
         <input type='password' value={senha} onChange={(e)=> setSenha(e.target.value)} /> <br/>
 
+        <button onClick={login}>Fazer Login</button>
+
         <button onClick={novoUsuario}>Cadastrar</button>
    
         <button onClick={logout}>Sair da conta!</button>
 
       </div>
+
+      <hr/> <br/>
+
+      {Object.keys(user).length > 0 && (
+          <div>
+            <strong>Olá </strong>{user.nome} <br/>
+            <strong>Cargo: </strong>{user.cargo} <br/>
+            <strong>Email: </strong>{user.email} <br/>
+            <strong>Status: </strong>{user.status ? 'ATIVO': 'DESATIVADO'} <br/>
+          </div>
+      )}
 
     </div>
   );
