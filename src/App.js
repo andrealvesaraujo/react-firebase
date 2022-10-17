@@ -1,8 +1,16 @@
 import './app.css'
 import {db} from './firebaseConnection'
-import {doc, collection, addDoc, getDocs, updateDoc, deleteDoc} from 'firebase/firestore'
-import { useState } from 'react'
-import { async } from '@firebase/util'
+import {
+  doc, 
+  collection, 
+  addDoc,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  onSnapshot
+} from 'firebase/firestore'
+
+import { useState, useEffect } from 'react'
 
 function App() {
 
@@ -12,6 +20,25 @@ function App() {
 
   const [posts, setPosts] = useState([])
 
+  useEffect(()=>{
+    async function loadPosts(){
+        const unsub = onSnapshot(collection(db, 'posts'), (snapshot)=>{
+          let lista = []
+    
+          snapshot.forEach((doc)=>{
+            lista.push({
+              id: doc.id,
+              titulo: doc.data().titulo,
+              autor: doc.data().autor,
+            })
+          })
+          setPosts(lista)
+        })
+    }
+
+    loadPosts()
+  }, [])
+
 
   async function handleAdd(){
     await addDoc(collection(db, 'posts'), {
@@ -19,7 +46,7 @@ function App() {
       autor:autor
     })
     .then(()=>{
-      alert.log("Cadastrado com sucesso")
+      alert("Cadastrado com sucesso")
       setAutor('')
       setTitulo('')
     })
@@ -58,7 +85,7 @@ function App() {
       autor:autor
     })
     .then(()=>{
-      alert.log('Post atualizado com sucesso')
+      alert('Post atualizado com sucesso')
       setIdPost('')
       setTitulo('')
       setAutor('')
@@ -74,7 +101,7 @@ function App() {
 
     await deleteDoc(docRef)
     .then(()=>{
-      alert.log("Post deletado com sucesso")
+      alert("Post deletado com sucesso")
     })
     .catch((err)=>{
       console.log("Erro ao excluir post: ", err)
