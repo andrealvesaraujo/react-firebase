@@ -1,12 +1,15 @@
 import './app.css'
 import {db} from './firebaseConnection'
-import {doc, collection, addDoc, getDoc} from 'firebase/firestore'
+import {doc, collection, addDoc, getDoc, getDocs} from 'firebase/firestore'
 import { useState } from 'react'
 
 function App() {
 
   const [titulo, setTitulo] = useState('')
   const [autor, setAutor] = useState('')
+
+  const [posts, setPosts] = useState([])
+
 
   async function handleAdd(){
     await addDoc(collection(db, 'posts'), {
@@ -25,12 +28,20 @@ function App() {
 
   async function buscarPost(){
 
-    const postRef = doc(db, 'posts', 'z38nmGeIW5aF2sgGROSS')
+    const postRef = collection(db, 'posts')
 
-    await getDoc(postRef)
+    await getDocs(postRef)
     .then((snapshot)=>{
-      setAutor(snapshot.data().autor)
-      setTitulo(snapshot.data().titulo)
+      let lista = []
+
+      snapshot.forEach((doc)=>{
+        lista.push({
+          id: doc.id,
+          titulo: doc.data().titulo,
+          autor: doc.data().autor,
+        })
+      })
+      setPosts(lista)
     })
     .catch((error)=>{
       console.log("Error ao buscar: " + error)
@@ -63,6 +74,17 @@ function App() {
 
           <button onClick={handleAdd}>Cadastrar</button>
           <button onClick={buscarPost}>Buscar</button>
+
+          <ul>
+            {posts.map((post)=>{
+              return (
+                <li key={post.id}>
+                  <span>Titulo: {post.titulo}</span> <br/>
+                  <span>Autor: {post.autor}</span> <br/><br/>
+                </li>
+              )
+            })}
+          </ul>
       </div>
     </div>
   );
