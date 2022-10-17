@@ -1,7 +1,8 @@
 import './app.css'
 import {db} from './firebaseConnection'
-import {doc, collection, addDoc, getDocs, updateDoc} from 'firebase/firestore'
+import {doc, collection, addDoc, getDocs, updateDoc, deleteDoc} from 'firebase/firestore'
 import { useState } from 'react'
+import { async } from '@firebase/util'
 
 function App() {
 
@@ -18,7 +19,7 @@ function App() {
       autor:autor
     })
     .then(()=>{
-      console.log("Cadastrado com sucesso")
+      alert.log("Cadastrado com sucesso")
       setAutor('')
       setTitulo('')
     })
@@ -57,7 +58,7 @@ function App() {
       autor:autor
     })
     .then(()=>{
-      console.log('Post atualizado com sucesso')
+      alert.log('Post atualizado com sucesso')
       setIdPost('')
       setTitulo('')
       setAutor('')
@@ -65,6 +66,20 @@ function App() {
     .catch((err)=>{
       console.log("Erro ao atualizar post: ", err)
     })
+  }
+
+  async function excluirPost(id){
+    
+    const docRef = doc(db, 'posts', id)
+
+    await deleteDoc(docRef)
+    .then(()=>{
+      alert.log("Post deletado com sucesso")
+    })
+    .catch((err)=>{
+      console.log("Erro ao excluir post: ", err)
+    })
+
   }
 
   
@@ -109,7 +124,8 @@ function App() {
                 <li key={post.id}>
                   <strong>ID: {post.id}</strong> <br/>
                   <span>Titulo: {post.titulo}</span> <br/>
-                  <span>Autor: {post.autor}</span> <br/><br/>
+                  <span>Autor: {post.autor}</span> <br/>
+                  <button onClick={() => excluirPost(post.id)}>Excluir</button> <br/><br/>
                 </li>
               )
             })}
