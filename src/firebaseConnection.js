@@ -1,12 +1,11 @@
 import { FIREBASE_INFO } from "./env";
-import firebase from "firebase/app";
-import 'firebase/firestore'
-import 'firebase/auth'
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from "firebase/firestore";
 
 let firebaseConfig = FIREBASE_INFO
 
-if(!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+const firebaseApp = initializeApp(firebaseConfig);
 
-export default firebase
+const db = getFirestore(firebaseApp)
+
+export { db }
