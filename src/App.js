@@ -1,12 +1,13 @@
 import './app.css'
 import {db} from './firebaseConnection'
-import {doc, collection, addDoc, getDoc, getDocs} from 'firebase/firestore'
+import {doc, collection, addDoc, getDocs, updateDoc} from 'firebase/firestore'
 import { useState } from 'react'
 
 function App() {
 
   const [titulo, setTitulo] = useState('')
   const [autor, setAutor] = useState('')
+  const [idPost, setIdPost] = useState('')
 
   const [posts, setPosts] = useState([])
 
@@ -48,6 +49,24 @@ function App() {
     })
   }
 
+  async function editarPost(){
+    const docRef = doc(db, 'posts', idPost)
+
+    await updateDoc(docRef, {
+      titulo: titulo,
+      autor:autor
+    })
+    .then(()=>{
+      console.log('Post atualizado com sucesso')
+      setIdPost('')
+      setTitulo('')
+      setAutor('')
+    })
+    .catch((err)=>{
+      console.log("Erro ao atualizar post: ", err)
+    })
+  }
+
   
 
 
@@ -56,6 +75,14 @@ function App() {
 
       <h1>ReactJS + Firebase :)</h1>
       <div className='container'>
+
+          <label>ID do Post: </label>
+          <input 
+            placeholder='Digite o ID do post'
+            value={idPost}
+            onChange={(e)=>{setIdPost(e.target.value)}}
+          />
+
           <label>Titulo: </label>
           <textarea 
             type="text" 
@@ -74,11 +101,13 @@ function App() {
 
           <button onClick={handleAdd}>Cadastrar</button>
           <button onClick={buscarPost}>Buscar</button>
+          <button onClick={editarPost}>Atualizar post</button>
 
           <ul>
             {posts.map((post)=>{
               return (
                 <li key={post.id}>
+                  <strong>ID: {post.id}</strong> <br/>
                   <span>Titulo: {post.titulo}</span> <br/>
                   <span>Autor: {post.autor}</span> <br/><br/>
                 </li>
