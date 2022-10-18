@@ -10,7 +10,7 @@ import {
   onSnapshot
 } from 'firebase/firestore'
 
-import {createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut} from 'firebase/auth'
+import {createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut} from 'firebase/auth'
 
 import { useState, useEffect } from 'react'
 
@@ -46,6 +46,27 @@ function App() {
     }
 
     loadPosts()
+  }, [])
+
+  useEffect(()=>{
+    async function checkLogin(){
+        onAuthStateChanged(auth, (user)=>{
+          if(user){
+            console.log(user)
+            setUser(true)
+            setUserDetail({
+              uid: user.uid,
+              email: user.email
+            })
+          } else {
+            setUser(false)
+            setUserDetail({})
+          }
+
+        })
+    }
+
+    checkLogin()
   }, [])
 
 
@@ -171,7 +192,7 @@ function App() {
         <div>
           <strong>Seja bem-vindo(a) (Você está logado!)</strong> <br/>
           <span>ID: {userDetail.uid} - Email: {userDetail.email} </span> <br/>
-          <button onClick={fazerLogout}>Sai da conta</button>
+          <button onClick={fazerLogout}>Sair da conta</button>
           <br/><br/>
         </div>
       )}
