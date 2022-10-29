@@ -3,14 +3,14 @@ import {auth, db} from '../../firebaseConnection';
 import {signOut} from 'firebase/auth';
 import { useState } from 'react';
 
-import {addDoc, collection, onSnapshot, query, orderBy, where} from 'firebase/firestore'
+import {addDoc, collection, onSnapshot, query, orderBy, where, doc, deleteDoc} from 'firebase/firestore'
 import { useEffect } from 'react';
 
 export default function Admin() {
 
   const [tarefaInput, setTarefaInput] = useState('')
   const [user, setUser] = useState('')
-  const [tarefas, setTarefas] = useState('')
+  const [tarefas, setTarefas] = useState([])
 
 
   useEffect(() =>{
@@ -28,6 +28,7 @@ export default function Admin() {
               let lista = []
               
               snapshot.forEach((doc)=>{
+                console.log(doc)
                 lista.push({
                   id:doc.id,
                   tarefa: doc.data().tarefa,
@@ -52,7 +53,7 @@ export default function Admin() {
       return
     }
 
-    await addDoc(collection(db, 'tarefa'), {
+    await addDoc(collection(db, 'tarefas'), {
       tarefa: tarefaInput,
       created: new Date(),
       userUid: user?.uid
@@ -70,6 +71,12 @@ export default function Admin() {
     await signOut(auth)
   }
 
+  async function deleteTarefa(id){
+    const docRef = doc(db, "tarefas", id)
+    
+    await deleteDoc(docRef)
+  }
+
   return (
     <div className='admin-container'>
         <h1>Minhas tarefas</h1>
@@ -84,14 +91,17 @@ export default function Admin() {
             <button className='btn-register' type='submit'>Registrar tarefa</button>
         </form>
 
-        <article className='list'>
-          <p>Estudar javascript e reactjs hoje a noite</p>
+        {tarefas.map((item) => (
+          <article className='list' key={item.id}>
+            <p>{item.tarefa}</p>
 
-          <div>
-            <button>Editar</button>
-            <button className='btn-delete'>Concluir</button>
-          </div>
-        </article>
+            <div>
+              <button>Editar</button>
+              <button className='btn-delete' onClick={()=> deleteTarefa(item.id)}>Concluir</button>
+            </div>
+          </article>
+        ))}
+        
 
         <button className='btn-logout' onClick={handleLogout}>Sair</button>
 
